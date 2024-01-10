@@ -1,0 +1,14 @@
+
+
+# ignore all logs
+*.log
+
+
+# system files
+/cypress/fixtures/*.json
+/utils/*.json
+/utils/*.csv
+/config/**
+
+# Node
+/node_modules

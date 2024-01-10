@@ -1,5 +1,6 @@
+import { userData } from './../../config/userdata';
 
-type Metadata = {
+type Metadata ={
   Kurzname:string;
   Entwickler:string;
   Leitidee:string;
@@ -19,12 +20,6 @@ type Metadata = {
   Aktuelle_Gruppe:string;
   Aktueller_Link:string;
 }
-
-export const userData={
-  user_name: 'yan',
-  user_pass: 'newstudioforyan1'
-};
-
 
 function insertOneRecord( record: Metadata ){
 
