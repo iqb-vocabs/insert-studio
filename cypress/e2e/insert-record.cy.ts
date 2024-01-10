@@ -196,9 +196,9 @@ describe('insert metadata', () => {
 
 
     //cy.fixture('records.json').as('records');
-    cy.fixture('records').then((records) => {
-      records.forEach((record: Metadata) => {
-        insertOneRecord(record);
+    cy.fixture('record').then((record) => {
+      record.forEach((r: Metadata) => {
+        insertOneRecord(r);
       });
     });
   });

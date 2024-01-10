@@ -43,7 +43,7 @@ function readCSV(){
 
         let records = JSON.stringify(result);
 
-        fs.writeFile('./utils/records.json', records,(err) => {
+        fs.writeFile('./utils/record.json', records,(err) => {
             if (err) {
                 console.log('Error writing file:', err);
             } else {
