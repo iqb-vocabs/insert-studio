@@ -1,4 +1,4 @@
 export const userData = {
-    user_name: '',
-    user_pass: ''
+    user_name: 'yan',
+    user_pass: 'permanenTp1studio'
 }
