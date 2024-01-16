@@ -23,14 +23,13 @@ type Metadata = {
     Aktueller_Link:string;
 }
 
-function readCSV(){
+function readCSV(filename:string){
     const results: object[] = [];
-    const file = path.join('./utils','rest_mathe_primar.csv')
+    const file = path.join('./utils',filename)
 
 
     const headers = ['Kurzname','Entwickler','Leitidee','Leitidee_Name','Aufgabenzeit','Stimuluszeit','Itemanzahl','Itemformat','Anforderungsbereich','BiSta_Inhalt_Primar','BiSta_Inhalt_Sekundar','BiSta_Prozess_Primar','BiSta_Prozess_Sekundar','Itemzeit','Schwierigkeit','Aktueller_Arbeitsbereich','Aktuelle_Gruppe','Aktueller_Link'];
     const fileContent = fs.readFileSync(file, { encoding: 'utf-8' })
-    //const parse = require('csv-parse');
 
     parse(fileContent, {
         delimiter: ';',
@@ -53,4 +52,4 @@ function readCSV(){
     });
 }
 
-readCSV();
+readCSV(process.argv[2]);

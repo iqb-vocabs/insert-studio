@@ -1,16 +1,37 @@
 {
   "name": "insert-studio",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "version": "0.1.0",
+  "author": "IQB - Institut zur Qualitätsentwicklung im Bildungswesen",
+  "license": "MIT",
+  "description": "Automatic metadata insertion from csv to Studio-lite",
   "scripts": {
-    "create_json": "ts-node utils/readcsv.ts",
+    "create_json": "ts-node utils/readcsv.ts record.csv",
+    "copy_to_fixtures": "cp utils/record.json cypress/fixtures/",
     "insert_record": "npx cypress open"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "homepage": "https://github.com/iqb-vocabs/insert-studio#readme",
+  "eslintConfig": {
+    "extends": "@iqb/eslint-config",
+    "parserOptions": {
+      "project": "./tsconfig.json"
+    },
+    "rules": {
+      "no-console": "off",
+      "class-methods-use-this": [
+        "error",
+        {
+          "exceptMethods": [
+            "getElementComponent",
+            "getNewOptionLabel",
+            "transform"
+          ]
+        }
+      ],
+      "import/export": 0
+    }
+  },
   "dependencies": {
+    "@iqb/eslint-config": "^2.1.1",
     "csv-parse": "^5.5.3",
     "cypress": "^13.6.2",
     "ts-node": "^10.9.2",

@@ -21,28 +21,38 @@ type Metadata ={
   Aktueller_Link:string;
 }
 
-function getCheckBoxByName(name: string, level:number=1){
+function getCheckBoxByName(name: string, level:number=1, additionalText: string =""){
   if (level===1)
-    cy.get(`span:contains('${name}')`).prev().click();
+    cy.get('span')
+        .contains(new RegExp("^"+ additionalText + name +"$"))
+        .prev()
+        .click();
   else
-    cy.get(`span:contains('${name}')`).prev().prev().click();
+    cy.get('span')
+        .contains(new RegExp("^" + additionalText+ name +"$"))
+        .prev()
+        .prev()
+        .click();
   cy.get('.mat-mdc-dialog-actions').contains('Bestätigen').click();
 }
 
 function getTime(time: string, propName:string):any{
   const minAuf= time.split(':')[0];
   const secAuf= time.split(':')[1];
-  cy.contains(propName).parent().as('parentTime1');
-  if (minAuf!=='00' && typeof minAuf !== 'undefined'){
-    cy.get('@parentTime1').get('div:first-child > mat-form-field:first-child input').type(minAuf);
 
+  cy.get('div.label.ng-star-inserted')
+      .contains(propName)
+      .prevUntil('.duration-container > div > mat-form-field > div')
+      .find('input').as('aufgabenzeit');
+  if (minAuf!=='00' && typeof minAuf !== 'undefined'){
+    cy.get('@aufgabenzeit')
+        .eq(0)
+        .type(minAuf);
   }
   if (secAuf!=='00' && typeof secAuf !== 'undefined') {
-   // cy.get(`contains('${propName}')`).prev().get(':last-child input').type(secAuf);
-    // cy.contains(propName).closest().get(':last-child input').type(secAuf);
-    //cy.contains(propName).closest('div input').type(secAuf);
-    cy.get('@parentTime1').get('div:first-child > mat-form-field:last-child input').type(secAuf);
-
+    cy.get('@aufgabenzeit')
+        .eq(1)
+        .type(secAuf);
   }
 }
 
@@ -50,45 +60,23 @@ function insertOneRecord( record: Metadata ){
 
   cy.contains(record.Kurzname).click();
 
-  //Aufgabe ************
+
+  //Aufgabe
   cy.get('mat-label:contains("Entwickler")').type(record.Entwickler);
-
-  // Dialog Leitidee
   cy.get('mat-label:contains("Leitidee")').click();
-
-  getCheckBoxByName(record.Leitidee_Name,2);
-
-
-  // Aufgabenzeit
-  //getTime(record.Aufgabenzeit, 'Aufgabenzeit');
-
-  // Stimuluszeit
-  //getTime(record.Stimuluszeit, 'ng-tns-c1205077789-42','ng-tns-c1205077789-43' );
+  getCheckBoxByName(record.Leitidee_Name,2, 'Leitidee ');
+  getTime(record.Aufgabenzeit, 'Aufgabenzeit');
+  getTime(record.Stimuluszeit, 'Stimuluszeit' );
 
   // Item
   cy.get('.add-button > .mdc-button__label').click();
   cy.get('mat-expansion-panel:contains("ohne ID")').click();
   cy.get('mat-label:contains("Item ID *")').type('01');
-
   cy.get('mat-label:contains("Itemformat")').click();
-  getCheckBoxByName(record.Itemformat);
-
+  getCheckBoxByName(record.Itemformat,1 );
   cy.get('mat-label:contains("Anforderungsbereich")').click();
-  getCheckBoxByName(record.Anforderungsbereich);
-
-  // Itemzeit
-  //getTime(record.Itemzeit, 'ng-tns-c1205077789-42','ng-tns-c1205077789-43' );
-
-
-  // const minItem= record.Itemzeit.split(':')[0];
-  // const secItem= record.Itemzeit.split(':')[1];
-  // if (minItem!=='00' && typeof minItem !== 'undefined'){
-  //   cy.get('#mat-input-20').type(minItem);
-  // }
-  // if (secItem!=='00' && typeof secItem !== 'undefined') {
-  //   cy.get('#mat-input-21').type(secItem);
-  // }
-
+  getCheckBoxByName(record.Anforderungsbereich, 1);
+  getTime(record.Itemzeit, 'Itemzeit' );
   cy.get('mat-label:contains("Schwierigkeit")').click();
   getCheckBoxByName(record.Schwierigkeit,2);
 
@@ -121,4 +109,6 @@ describe('insert metadata', () => {
            });
     });
   });
+
+
 });
