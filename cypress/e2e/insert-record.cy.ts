@@ -21,6 +21,10 @@ type Metadata ={
   Aktueller_Link:string;
 }
 
+function getNotationDeep(notation: string): number {
+  return (notation.split('.')).length-1;
+}
+
 function getCheckBoxByName(name: string, level:number=1, additionalText: string =""){
   if (level===1)
     cy.get('span')
@@ -56,33 +60,108 @@ function getTime(time: string, propName:string):any{
   }
 }
 
+function waitForMetadata(){
+  let check = true;
+  while(check) {
+    cy.get('body').then($body => {
+      const dis = $body.find('mat-label:contains("Entwickler")')
+      if (dis.length>0)
+        check = false;
+    })
+  }
+}
+
+function getBistaPrimar(notation :string):any{
+  // split the notation
+  // 2 search : partial and total
+    let actualLevel: number = 0;
+    let realLevel: number;
+    realLevel = getNotationDeep(notation);
+    let notationParts = notation.split('.');
+    let i = 0;
+    let actualNotation: string = notationParts[i];
+
+    while (actualLevel < realLevel) {
+      //TODO
+      //click on the right checkbox as
+      if (actualNotation !== '1')     //if line  to delete once Julian fixes
+        cy.get('span')
+            .contains(new RegExp("^" + actualNotation + "$")).prev().prev().click();
+      i += 1;
+      actualNotation = actualNotation + '.' + notationParts[i];
+      actualLevel += 1;
+
+    }
+
+    cy.get('span')
+        .contains(new RegExp("^" + actualNotation + "$")).prev().click();
+    cy.get('.mat-mdc-dialog-actions').contains('Bestätigen').click();
+}
+
+function getBistaSekundar(notations: string, label: string): any{
+  let notationArray = notations.split(',');
+  notationArray.forEach((notation) => {
+    cy.get(label).click();
+    getBistaPrimar(notation);
+  });
+}
+
 function insertOneRecord( record: Metadata ){
 
   cy.contains(record.Kurzname).click();
-
-
   //Aufgabe
+  //waitForMetadata();
+
   cy.get('mat-label:contains("Entwickler")').type(record.Entwickler);
-  cy.get('mat-label:contains("Leitidee")').click();
-  getCheckBoxByName(record.Leitidee_Name,2, 'Leitidee ');
-  getTime(record.Aufgabenzeit, 'Aufgabenzeit');
-  getTime(record.Stimuluszeit, 'Stimuluszeit' );
+  if (record.Leitidee_Name!=='') {
+    cy.get('mat-label:contains("Leitidee")').click();
+    getCheckBoxByName(record.Leitidee_Name, 2, 'Leitidee ');
+  }
+  if (record.Aufgabenzeit!=='') {
+    getTime(record.Aufgabenzeit, 'Aufgabenzeit');
+  }
+  if (record.Stimuluszeit!=='') {
+    getTime(record.Stimuluszeit, 'Stimuluszeit');
+  }
 
   // Item
   cy.get('.add-button > .mdc-button__label').click();
   cy.get('mat-expansion-panel:contains("ohne ID")').click();
   cy.get('mat-label:contains("Item ID *")').type('01');
-  cy.get('mat-label:contains("Itemformat")').click();
-  getCheckBoxByName(record.Itemformat,1 );
-  cy.get('mat-label:contains("Anforderungsbereich")').click();
-  getCheckBoxByName(record.Anforderungsbereich, 1);
-  getTime(record.Itemzeit, 'Itemzeit' );
-  cy.get('mat-label:contains("Schwierigkeit")').click();
-  getCheckBoxByName(record.Schwierigkeit,2);
+  if (record.Itemformat!=='') {
+    cy.get('mat-label:contains("Itemformat")').click();
+    getCheckBoxByName(record.Itemformat, 1);
+  }
+  if (record.Anforderungsbereich!=='') {
+    cy.get('mat-label:contains("Anforderungsbereich")').click();
+    getCheckBoxByName(record.Anforderungsbereich, 1);
+  }
+  if (record.BiSta_Inhalt_Primar!=='') {
+    cy.get('mat-label:contains("Inhaltsbezogener Bildungsstandard primär")').click();
+    getBistaPrimar(record.BiSta_Inhalt_Primar);
+  }
+  if (record.BiSta_Inhalt_Sekundar!=='') {
+    getBistaSekundar(record.BiSta_Inhalt_Sekundar, 'mat-label:contains("Inhaltsbezogener Bildungsstandard sekundär")');
+  }
+  if (record.BiSta_Prozess_Primar!=='') {
+    cy.get('mat-label:contains("Prozessbezogener Bildungsstandard primär")').click();
+    getBistaPrimar(record.BiSta_Prozess_Primar);
+  }
+  if (record.BiSta_Prozess_Sekundar!=='') {
+    getBistaSekundar(record.BiSta_Prozess_Sekundar, 'mat-label:contains("Inhaltsbezogener Bildungsstandard primär")');
+  }
 
+  if (record.Itemzeit!=='') {
+    getTime(record.Itemzeit, 'Itemzeit');
+    cy.get('mat-label:contains("Schwierigkeit")').click();
+  }
+
+  if (record.Schwierigkeit!=='') {
+    getCheckBoxByName(record.Schwierigkeit, 2);
+  }
   cy.pause();
+  cy.contains('Speichern').click();
 }
-
 
 
 describe('insert metadata', () => {
@@ -91,24 +170,31 @@ describe('insert metadata', () => {
 
   });
 
-  // afterEach(function(){
-  //   cy.get('.mat-icon').click();
-  //   cy.get('[studiolitelogout=""] > .mat-mdc-menu-item').click();
-  //   cy.get('.mat-mdc-dialog-actions').contains('Abmelden').click();
-  // });
+   afterEach(function(){
+     cy.get('a > .mat-mdc-tooltip-trigger').click();
+     cy.get('.mat-icon').click();
+     cy.get('[studiolitelogout=""] > .mat-mdc-menu-item').click();
+     cy.get('.mat-mdc-dialog-actions').contains('Abmelden').click();
+   });
 
   it('visit', () => {
-    cy.visit('https://www.iqb-studio.de/');
+    cy.visit('https://studio.iqb.hu-berlin.de/');
     cy.get('#mat-input-0').type(userData.user_name);
     cy.get('#mat-input-1').type(userData.user_pass);
     cy.get('button > .mdc-button__label').click();
-    cy.contains('Yan').click();
+    cy.wait(400);
+    //cy.intercept('GET', '/#/a/13').as('accessZone');
+    cy.contains('Probe Dezember').click();
+    //cy.visit('https://studio.iqb.hu-berlin.de/#/a/13');
+    //cy.pause();
+
     cy.fixture('record').then((record) => {
            record.forEach((r: Metadata) => {
              insertOneRecord(r);
            });
     });
+    
+    cy.wait(400);
   });
-
 
 });
