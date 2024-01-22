@@ -40,6 +40,18 @@ function getCheckBoxByName(name: string, level:number=1, additionalText: string 
   cy.get('.mat-mdc-dialog-actions').contains('Bestätigen').click();
 }
 
+function getUncheckBoxByName(name: string, level:number=1, additionalText: string =""){
+  if (level===1)
+    cy.get('mat-tree')
+        .contains(new RegExp("^"+ additionalText + name +"$"))
+        .uncheck();
+  else
+    cy.get('mat-tree')
+        .contains(new RegExp("^" + additionalText+ name +"$"))
+        .uncheck();
+  cy.get('.mat-mdc-dialog-actions').contains('Bestätigen').click();
+}
+
 function getTime(time: string, propName:string):any{
   const minAuf= time.split(':')[0];
   const secAuf= time.split(':')[1];
@@ -60,6 +72,25 @@ function getTime(time: string, propName:string):any{
   }
 }
 
+function resetTime(time: string, propName:string):any{
+  const minAuf= time.split(':')[0];
+  const secAuf= time.split(':')[1];
+
+  cy.get('div.label.ng-star-inserted')
+      .contains(propName)
+      .prevUntil('.duration-container > div > mat-form-field > div')
+      .find('input').as('aufgabenzeit');
+  if (minAuf!=='00' && typeof minAuf !== 'undefined'){
+    cy.get('@aufgabenzeit')
+        .eq(0)
+        .type('{selectAll}00');
+  }
+  if (secAuf!=='00' && typeof secAuf !== 'undefined') {
+    cy.get('@aufgabenzeit')
+        .eq(1)
+        .type('{selectAll}00');
+  }
+}
 function waitForMetadata(){
   let check = true;
   while(check) {
@@ -111,8 +142,9 @@ function insertOneRecord( record: Metadata ){
   cy.contains(record.Kurzname).click();
   //Aufgabe
   //waitForMetadata();
-
-  cy.get('mat-label:contains("Entwickler")').type(record.Entwickler);
+  if (record.Entwickler!=='') {
+    cy.get('mat-label:contains("Entwickler")').type(record.Entwickler);
+  }
   if (record.Leitidee_Name!=='') {
     cy.get('mat-label:contains("Leitidee")').click();
     getCheckBoxByName(record.Leitidee_Name, 2, 'Leitidee ');
@@ -123,7 +155,6 @@ function insertOneRecord( record: Metadata ){
   if (record.Stimuluszeit!=='') {
     getTime(record.Stimuluszeit, 'Stimuluszeit');
   }
-
   // Item
   cy.get('.add-button > .mdc-button__label').click();
   cy.get('mat-expansion-panel:contains("ohne ID")').click();
@@ -163,21 +194,43 @@ function insertOneRecord( record: Metadata ){
   cy.contains('Speichern').click();
 }
 
+function deleteOneRecord( record: Metadata ){
 
-describe('insert metadata', () => {
+  cy.contains(record.Kurzname).click();
+
+  cy.get('mat-label:contains("Entwickler")').type('{selectall} ');
+
+    if (record.Leitidee_Name!=='') {
+      cy.get('mat-icon:contains("cancel")').eq(0).click();
+      //getUncheckBoxByName(record.Leitidee_Name, 2, 'Leitidee ');
+    }
+  if (record.Aufgabenzeit!=='') {
+    resetTime(record.Aufgabenzeit, 'Aufgabenzeit');
+  }
+  if (record.Stimuluszeit!=='') {
+    resetTime(record.Stimuluszeit, 'Stimuluszeit');
+  }
+
+  // Item
+  cy.get('.fx-row-space-between-start > .mdc-icon-button > .mat-mdc-button-touch-target').click();
+  cy.pause();
+  cy.contains('Speichern').click();
+}
+
+describe('metadata', () => {
   beforeEach(function(){
     cy.viewport(1600, 900);
 
   });
 
-   afterEach(function(){
+/*   afterEach(function(){
      cy.get('a > .mat-mdc-tooltip-trigger').click();
-     cy.get('.mat-icon').click();
+     cy.get('.mdc-button__label').click();
      cy.get('[studiolitelogout=""] > .mat-mdc-menu-item').click();
      cy.get('.mat-mdc-dialog-actions').contains('Abmelden').click();
-   });
+   });*/
 
-  it('visit', () => {
+  it('insert', () => {
     cy.visit('https://studio.iqb.hu-berlin.de/');
     cy.get('#mat-input-0').type(userData.user_name);
     cy.get('#mat-input-1').type(userData.user_pass);
@@ -193,7 +246,27 @@ describe('insert metadata', () => {
              insertOneRecord(r);
            });
     });
-    
+
+    cy.wait(400);
+  });
+
+  it.only('delete', () => {
+    cy.visit('https://studio.iqb.hu-berlin.de/');
+    cy.get('#mat-input-0').type(userData.user_name);
+    cy.get('#mat-input-1').type(userData.user_pass);
+    cy.get('button > .mdc-button__label').click();
+    cy.wait(400);
+    //cy.intercept('GET', '/#/a/13').as('accessZone');
+    cy.contains('Probe Dezember').click();
+    //cy.visit('https://studio.iqb.hu-berlin.de/#/a/13');
+    //cy.pause();
+
+    cy.fixture('record').then((record) => {
+      record.forEach((r: Metadata) => {
+        deleteOneRecord(r);
+      });
+    });
+
     cy.wait(400);
   });
 
