@@ -200,10 +200,10 @@ function deleteOneRecord( record: Metadata ){
 
   cy.get('mat-label:contains("Entwickler")').type('{selectall} ');
 
-    if (record.Leitidee_Name!=='') {
+  if (record.Leitidee_Name!=='') {
       cy.get('mat-icon:contains("cancel")').eq(0).click();
       //getUncheckBoxByName(record.Leitidee_Name, 2, 'Leitidee ');
-    }
+  }
   if (record.Aufgabenzeit!=='') {
     resetTime(record.Aufgabenzeit, 'Aufgabenzeit');
   }
@@ -230,7 +230,7 @@ describe('metadata', () => {
      cy.get('.mat-mdc-dialog-actions').contains('Abmelden').click();
    });*/
 
-  it('insert', () => {
+  it.only('insert', () => {
     cy.visit('https://studio.iqb.hu-berlin.de/');
     cy.get('#mat-input-0').type(userData.user_name);
     cy.get('#mat-input-1').type(userData.user_pass);
@@ -250,7 +250,7 @@ describe('metadata', () => {
     cy.wait(400);
   });
 
-  it.only('delete', () => {
+  it('delete', () => {
     cy.visit('https://studio.iqb.hu-berlin.de/');
     cy.get('#mat-input-0').type(userData.user_name);
     cy.get('#mat-input-1').type(userData.user_pass);

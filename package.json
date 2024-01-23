@@ -7,7 +7,7 @@
   "scripts": {
     "create_json": "ts-node utils/readcsv.ts record.csv",
     "copy_to_fixtures": "cp utils/record.json cypress/fixtures/",
-    "insert_record": "npx cypress open"
+    "test-system-ui": "npx cypress open"
   },
   "homepage": "https://github.com/iqb-vocabs/insert-studio#readme",
   "eslintConfig": {

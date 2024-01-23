@@ -1,5 +1,9 @@
 import { defineConfig } from "cypress";
 
+const urls = {
+  produktiv: 'https://www.iqb-studio.de',
+  testServer: 'https://studio.iqb.hu-berlin.de'
+}
 export default defineConfig({
   e2e: {
     watchForFileChanges: false,
@@ -7,5 +11,9 @@ export default defineConfig({
       // implement node event listeners here
 
     },
+    baseUrl: 'https://studio.iqb.hu-berlin.de',
+    env: {
+      urls
+    }
   },
 });
