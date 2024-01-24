@@ -1,4 +1,5 @@
 import Chainable = Cypress.Chainable;
+import {userData} from "../../config/userdata";
 
 export const visitLoginPage = (): Chainable => cy.url()
     .then(url => {
@@ -20,12 +21,26 @@ export const insertCredentials = (username: string, password = ''): void => {
     }
 };
 
-export const clickButtonToAccept = (text: string):void =>{
+export const loginAdmin=():void=>{
+    insertCredentials(userData.user_name, userData.user_pass);
+    cy.intercept('/api/login').as('asLogin');
+    clickButtonToAccept('Weiter');
+    cy.wait('@asLogin');
+    cy.get(`li.ng-star-inserted:contains:"${userData.user_name}"`).should('exist');
+}
+export const clickButtonToAccept = (text: string):Chainable => cy.url()
+    .then( url =>{
     cy.get('button')
         .contains(text)
         .should('exist')
         .click();
-}
+});
+// export const clickButtonToAccept = (text: string):void =>{
+//     cy.get('button')
+//         .contains(text)
+//         .should('exist')
+//         .click();
+// }
 
 export const logout = () => {
     //TODO selector

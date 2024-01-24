@@ -1,22 +1,24 @@
-import {changePassword, clickButtonToAccept, insertCredentials, logout, visitLoginPage} from "./util";
+import {changePassword, clickButtonToAccept, insertCredentials, loginAdmin, logout, visitLoginPage} from "./util";
 import {userData} from "../../config/userdata";
 
 describe('Usermanagement (user-tab)', () => {
-
+   beforeEach(visitLoginPage);
+  // beforeEach(loginAdmin);
+   
    it('should be possible login with credentials', () => {
-      visitLoginPage();
       insertCredentials(userData.user_name, userData.user_pass);
       clickButtonToAccept('Weiter');
    });
 
    it('should not be able to login with incorrect credentials', () => {
-      visitLoginPage();
       insertCredentials(userData.user_name, 'nopass');
+      cy.intercept('POST','/api/login').as('responseLogin');
       clickButtonToAccept('Weiter');
+      cy.wait('@responseLogin').its('response.statusCode').should('eq',401);
+
    });
 
    it('should be able setting button', () => {
-      visitLoginPage();
       insertCredentials(userData.user_name, userData.user_pass);
       clickButtonToAccept('Weiter');
       // TODO change the selector, the actual one got from cypress, getting all setting icons and select the first one
@@ -25,19 +27,36 @@ describe('Usermanagement (user-tab)', () => {
    });
 
    it('should be possible log out if the user is logged', () => {
-      visitLoginPage();
       insertCredentials(userData.user_name, userData.user_pass);
       clickButtonToAccept('Weiter');
       logout();
    });
 
-   it.only('should be possible change the password', () =>{
-      visitLoginPage();
+   it('should be possible change the password', () =>{
       insertCredentials(userData.user_name, userData.user_pass);
       clickButtonToAccept('Weiter');
       changePassword('newpass', userData.user_pass);
       logout();
-      //TODO check with oldPass fails and restore the oldPass
-   })
+
+      visitLoginPage();
+      insertCredentials(userData.user_name, userData.user_pass);
+      cy.intercept('POST','/api/login').as('responseLogin');
+      clickButtonToAccept('Weiter');
+      cy.wait('@responseLogin').its('response.statusCode').should('eq',401);
+
+      visitLoginPage();
+      insertCredentials(userData.user_name, 'newpass');
+      clickButtonToAccept('Weiter');
+      changePassword(userData.user_pass,'newpass');
+      logout();
+   });
+
+   it('user with admin credentials can add new user', () => {
+      //TODO
+   });
+   it('user with admin credentials can delete user', () => {
+      //TODO
+   });
+
 
 });

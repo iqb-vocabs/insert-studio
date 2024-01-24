@@ -41,16 +41,11 @@ function getCheckBoxByName(name: string, level:number=1, additionalText: string 
 }
 
 function getUncheckBoxByName(name: string, level:number=1, additionalText: string =""){
-  if (level===1)
-    cy.get('mat-tree')
-        .contains(new RegExp("^"+ additionalText + name +"$"))
-        .uncheck();
-  else
-    cy.get('mat-tree')
-        .contains(new RegExp("^" + additionalText+ name +"$"))
-        .uncheck();
+  cy.get('mat-checkbox .mdc-checkbox--selected')
+        .click();
   cy.get('.mat-mdc-dialog-actions').contains('Bestätigen').click();
 }
+
 
 function getTime(time: string, propName:string):any{
   const minAuf= time.split(':')[0];
@@ -139,7 +134,9 @@ function getBistaSekundar(notations: string, label: string): any{
 
 function insertOneRecord( record: Metadata ){
 
+  //cy.intercept('GET','/api/workspace').as('findUnit');
   cy.contains(record.Kurzname).click();
+  //cy.wait('@findUnit').its('response.statusCode').should('eq',200);
   //Aufgabe
   //waitForMetadata();
   if (record.Entwickler!=='') {
@@ -201,8 +198,9 @@ function deleteOneRecord( record: Metadata ){
   cy.get('mat-label:contains("Entwickler")').type('{selectall} ');
 
   if (record.Leitidee_Name!=='') {
-      cy.get('mat-icon:contains("cancel")').eq(0).click();
+      //cy.get('mat-label:contains("Leitidee")').click();
       //getUncheckBoxByName(record.Leitidee_Name, 2, 'Leitidee ');
+      cy.get('button.mat-mdc-chip-remove').eq(0).click();
   }
   if (record.Aufgabenzeit!=='') {
     resetTime(record.Aufgabenzeit, 'Aufgabenzeit');
@@ -230,7 +228,7 @@ describe('metadata', () => {
      cy.get('.mat-mdc-dialog-actions').contains('Abmelden').click();
    });*/
 
-  it.only('insert', () => {
+  it('insert', () => {
     cy.visit('https://studio.iqb.hu-berlin.de/');
     cy.get('#mat-input-0').type(userData.user_name);
     cy.get('#mat-input-1').type(userData.user_pass);
